@@ -3,6 +3,7 @@ import UserList from "./UserList.js";
 import Header from "./Header.js";
 import TodoForm from "./TodoForm.js";
 import TodoList from "./TodoList.js";
+import { parse } from "./querystring.js";
 
 export default function App({ $target }) {
   const $userListContainer = document.createElement("div");
@@ -22,6 +23,7 @@ export default function App({ $target }) {
     $target: $userListContainer,
     initialState: this.state.userList,
     onSelect: async (username) => {
+      history.pushState(null, null, `/?selectedUsername=${username}`);
       this.setState({
         ...this.state,
         selectedUsername: username,
@@ -135,14 +137,14 @@ export default function App({ $target }) {
   };
 
   const fetchTodos = async () => {
-    const { selectedUserName } = this.state;
+    const { selectedUsername } = this.state;
 
-    if (selectedUserName) {
+    if (selectedUsername) {
       this.setState({
         ...this.state,
         isTodoLoading: true,
       });
-      const todos = await request(`/${selectedUserName}`);
+      const todos = await request(`/${selectedUsername}`);
       this.setState({
         ...this.state,
         todos,
@@ -153,8 +155,27 @@ export default function App({ $target }) {
 
   const init = async () => {
     await fetchUserList();
+
+    // url에 특정 사용자를 나타내는 값이 있을 경우
+    const { search } = location;
+
+    if (search.length > 0) {
+      const { selectedUsername } = parse(search.substring(1));
+
+      if (selectedUsername) {
+        this.setState({
+          ...this.state,
+          selectedUsername,
+        });
+        await fetchTodos();
+      }
+    }
   };
 
   this.render();
   init();
+
+  window.addEventListener("popstate", () => {
+    init();
+  });
 }
