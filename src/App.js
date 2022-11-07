@@ -29,7 +29,7 @@ export default function App({ $target }) {
         ...this.state,
         todos: [...this.state.todos, todo],
       });
-      await request(`/${this.state.username}?delay=3000`, {
+      await request(`/${this.state.username}`, {
         method: "POST",
         body: JSON.stringify(todo),
       });
