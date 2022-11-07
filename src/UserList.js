@@ -13,18 +13,14 @@ export default function UserList({ $target, initialState, onSelect }) {
     $userList.innerHTML = `
       <h1>Users</h1>
       <ul>
-          ${this.state
-            .map(
-              (username) => `
-            <li data-username=${username}>${username}</li>
-          `
-            )
-            .join("")}
-            <li>
-              <form>
-                <input class="new-user" type="text" placeholder="add username">
-              </form>
-            </li>
+        ${this.state.map((username) => 
+          `<li data-username=${username}>${username}</li>`
+          ).join("")}
+          <li>
+            <form>
+              <input class="new-user" type="text" placeholder="add username">
+            </form>
+          </li>
       </ul>
     `;
   };
