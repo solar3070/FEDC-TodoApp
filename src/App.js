@@ -10,9 +10,12 @@ export default function App({ $target }) {
     isTodoLoading: false,
   };
 
-  new Header({
+  const header = new Header({
     $target,
-    initialState: this.state.username,
+    initialState: {
+      isLoading: this.state.isTodoLoading,
+      username: this.state.username,
+    },
   });
 
   new TodoForm({
@@ -22,7 +25,11 @@ export default function App({ $target }) {
         content,
         isCompleted: false,
       };
-      await request(`/${this.state.username}`, {
+      this.setState({
+        ...this.state,
+        todos: [...this.state.todos, todo],
+      });
+      await request(`/${this.state.username}?delay=3000`, {
         method: "POST",
         body: JSON.stringify(todo),
       });
@@ -33,24 +40,52 @@ export default function App({ $target }) {
   this.setState = (nextState) => {
     this.state = nextState;
 
-    isTodoLoading: true,
-      todoList.setState({
-        isTodoLoading: this.state.isTodoLoading,
-        todos: this.state.todos,
-      });
+    header.setState({
+      isLoading: this.state.isTodoLoading,
+      username: this.state.username,
+    });
+
+    todoList.setState({
+      isLoading: this.state.isTodoLoading,
+      todos: this.state.todos,
+    });
   };
 
   const todoList = new TodoList({
     $target,
     initialState: {
-      isTodoLoading: this.state.isTodoLoading,
+      isLoading: this.state.isTodoLoading,
       todos: this.state.todos,
     },
-    onToggle: (id) => {
-      alert(`${id} 토글 예정`);
+    onToggle: async (id) => {
+      const todoIndex = this.state.todos.findIndex((todo) => todo._id === id);
+
+      const nextTodos = [...this.state.todos];
+      nextTodos[todoIndex].isCompleted = !nextTodos[todoIndex].isCompleted;
+      this.setState({
+        ...this.state,
+        todos: nextTodos,
+      });
+
+      await request(`/${this.state.username}/${id}/toggle`, {
+        method: "PUT",
+      });
+      await fetchTodos();
     },
-    onRemove: (id) => {
-      alert(`${id} 삭제 예정`);
+    onRemove: async (id) => {
+      const todoIndex = this.state.todos.findIndex((todo) => todo._id === id);
+
+      const nextTodos = [...this.state.todos];
+      nextTodos.splice(todoIndex, 1);
+      this.setState({
+        ...this.state,
+        todos: nextTodos,
+      });
+
+      await request(`/${this.state.username}/${id}?`, {
+        method: "DELETE",
+      });
+      await fetchTodos();
     },
   });
 
@@ -62,7 +97,7 @@ export default function App({ $target }) {
         ...this.state,
         isTodoLoading: true,
       });
-      const todos = await request(`/${username}?delay=5000`);
+      const todos = await request(`/${username}`);
       this.setState({
         ...this.state,
         todos,

@@ -16,14 +16,9 @@ export default function TodoList({
   };
 
   this.render = () => {
-    const { isTodoLoading, todos } = this.state;
+    const { isLoading, todos } = this.state;
 
-    if (isTodoLoading) {
-      $todo.innerHTML = "Loading...";
-      return;
-    }
-
-    if (todos.length === 0) {
+    if (!isLoading && todos.length === 0) {
       $todo.innerHTML = "Todo가 없습니다!";
       return;
     }
