@@ -18,4 +18,10 @@ const $target = document.querySelector("#app");
 new TodoList({
   $target,
   initialState: DUMMY_DATA,
+  onToggle: (id) => {
+    alert(`${id} 토글 예정`);
+  },
+  onRemove: (id) => {
+    alert(`${id} 삭제 예정`);
+  },
 });

@@ -1,4 +1,9 @@
-export default function TodoList({ $target, initialState }) {
+export default function TodoList({
+  $target,
+  initialState,
+  onToggle,
+  onRemove,
+}) {
   const $todo = document.createElement("div");
 
   $target.appendChild($todo);
@@ -14,13 +19,30 @@ export default function TodoList({ $target, initialState }) {
     $todo.innerHTML = `
       <ul>${this.state
         .map(
-          ({ content, isCompleted }) => `
-        <li>${content}</li>
+          ({ _id, content, isCompleted }) => `
+        <li data-id=${_id} class="todo-item">
+          ${isCompleted ? `<s>${content}</s>` : content}
+          <button class="remove">x</button>
+        </li>
       `
         )
         .join("")}</ul>
     `;
   };
+
+  $todo.addEventListener("click", (e) => {
+    const $li = e.target.closest(".todo-item");
+
+    if ($li) {
+      const { id } = $li.dataset;
+      const { className } = e.target;
+      if (className === "remove") {
+        onRemove(id);
+      } else {
+        onToggle(id);
+      }
+    }
+  });
 
   this.render();
 }
